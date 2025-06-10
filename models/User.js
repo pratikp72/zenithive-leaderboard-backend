@@ -21,32 +21,110 @@ const userSchema = new mongoose.Schema({
   rolloverPoints: { type: Number, default: 0 },
   monthlyPoints: [monthlyPointSchema],
   leaderboardEntries: [leaderboardEntrySchema],
-
+  
   password: {
     type: String,
-    required: true, // make it required
+    required: true,
   },
   role: {
     type: String,
     default: 'employee',
     enum: ['employee', 'admin'],
   },
+  
+  // New Resource Management Fields
+  salary: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  overhead: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 100 // percentage
+  },
+  monthlyHours: {
+    type: Number,
+    default: 160, // standard 40 hours/week * 4 weeks
+    min: 1
+  },
+  effectiveHourlyCost: {
+    type: Number,
+    default: 0,
+    min: 0
+  }
+}, {
+  timestamps: true // adds createdAt and updatedAt fields
 });
 
-// Hash password if it's not hashed already
-userSchema.pre('save', async function (next) {
+// Method to calculate effective hourly cost
+userSchema.methods.calculateEffectiveHourlyCost = function() {
+  if (!this.salary || !this.monthlyHours) {
+    return 0;
+  }
+  
+  const monthlyCost = (this.salary / 12) * (1 + (this.overhead || 0) / 100);
+  const effectiveHourlyCost = monthlyCost / this.monthlyHours;
+  
+  return Math.round(effectiveHourlyCost * 100) / 100; // round to 2 decimal places
+};
+
+// Pre-save middleware to calculate effective hourly cost
+userSchema.pre('save', async function(next) {
+  // Hash password if it's not hashed already
   if (this.isModified('password') && !this.password.startsWith('$2b$')) {
     this.password = await bcrypt.hash(this.password, 10);
   }
+  
+  // Calculate effective hourly cost when salary, overhead, or monthlyHours change
+  if (this.isModified('salary') || this.isModified('overhead') || this.isModified('monthlyHours')) {
+    this.effectiveHourlyCost = this.calculateEffectiveHourlyCost();
+  }
+  
+  next();
+});
+
+// Pre-update middleware to calculate effective hourly cost
+userSchema.pre(['findOneAndUpdate', 'updateOne', 'updateMany'], function(next) {
+  const update = this.getUpdate();
+  
+  // Check if any of the cost-related fields are being updated
+  if (update.salary !== undefined || update.overhead !== undefined || update.monthlyHours !== undefined) {
+    // We need to calculate the new effective hourly cost
+    // This is a bit complex because we need the current values
+    // We'll handle this in the controller instead
+    update.effectiveHourlyCost = undefined; // Will be calculated in controller
+  }
+  
   next();
 });
 
 // Default password logic — for when not passed manually
-userSchema.pre('validate', function (next) {
+userSchema.pre('validate', function(next) {
   if (!this.password) {
     this.password = 'zenithive123';
   }
   next();
 });
+
+// Virtual for formatted salary
+userSchema.virtual('formattedSalary').get(function() {
+  return this.salary ? `$${this.salary.toLocaleString()}` : '-';
+});
+
+// Virtual for formatted overhead
+userSchema.virtual('formattedOverhead').get(function() {
+  return this.overhead ? `${this.overhead}%` : '-';
+});
+
+// Virtual for formatted effective hourly cost
+userSchema.virtual('formattedEffectiveHourlyCost').get(function() {
+  return this.effectiveHourlyCost ? `$${this.effectiveHourlyCost}` : '-';
+});
+
+// Ensure virtuals are included in JSON output
+userSchema.set('toJSON', { virtuals: true });
+userSchema.set('toObject', { virtuals: true });
 
 export default mongoose.model('User', userSchema);
