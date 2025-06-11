@@ -3,9 +3,6 @@ export const calculateEffectiveHourlyCost = (
   overhead,
   monthlyHours
 ) => {
-  console.log("salary", salary);
-  console.log("overhead", overhead);
-  console.log("monthlyHours", monthlyHours);
 
   if (!salary || !monthlyHours) return 0;
 
@@ -20,9 +17,6 @@ export const calculateEffectiveHourlyCost = (
   const rounded =
     Math.round((effectiveHourlyCost + Number.EPSILON) * 100) / 100;
 
-  console.log("monthlyCost:", monthlyCost);
-  console.log("effectiveHourlyCost (raw):", effectiveHourlyCost);
-  console.log("effectiveHourlyCost (rounded):", rounded);
 
   return rounded;
 };

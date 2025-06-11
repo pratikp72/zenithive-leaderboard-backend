@@ -34,7 +34,7 @@ export const authenticateUser = async (req, res) => {
         role: user.role,
         userId: user._id,
       },
-      process.env.JWT_SECRET || "your-secret-key",
+      process.env.JWT_SECRET,
       { expiresIn: "24h" }
     );
 
