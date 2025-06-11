@@ -64,10 +64,16 @@ userSchema.methods.calculateEffectiveHourlyCost = function() {
     return 0;
   }
   
-  const monthlyCost = (this.salary / 12) * (1 + (this.overhead || 0) / 100);
-  const effectiveHourlyCost = monthlyCost / this.monthlyHours;
+  // Use parseFloat and proper rounding to avoid floating-point precision issues
+  const salary = parseFloat(this.salary);
+  const overhead = parseFloat(this.overhead) || 0;
+  const monthlyHours = parseFloat(this.monthlyHours);
   
-  return Math.round(effectiveHourlyCost * 100) / 100; // round to 2 decimal places
+  const monthlyCost = (salary / 12) * (1 + overhead / 100);
+  const effectiveHourlyCost = monthlyCost / monthlyHours;
+  
+  // Round to 2 decimal places using a more reliable method
+  return Math.round((effectiveHourlyCost + Number.EPSILON) * 100) / 100;
 };
 
 // Pre-save middleware to calculate effective hourly cost
@@ -85,20 +91,6 @@ userSchema.pre('save', async function(next) {
   next();
 });
 
-// Pre-update middleware to calculate effective hourly cost
-userSchema.pre(['findOneAndUpdate', 'updateOne', 'updateMany'], function(next) {
-  const update = this.getUpdate();
-  
-  // Check if any of the cost-related fields are being updated
-  if (update.salary !== undefined || update.overhead !== undefined || update.monthlyHours !== undefined) {
-    // We need to calculate the new effective hourly cost
-    // This is a bit complex because we need the current values
-    // We'll handle this in the controller instead
-    update.effectiveHourlyCost = undefined; // Will be calculated in controller
-  }
-  
-  next();
-});
 
 // Default password logic — for when not passed manually
 userSchema.pre('validate', function(next) {

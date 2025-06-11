@@ -9,7 +9,7 @@ import {
   getUsersWithCostSummary,
   authenticateUser, 
   changePassword 
-} from '../controllers/userController.js';
+} from '../controllers/user/index.js';
 import { verifyAdmin, verifyToken } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
