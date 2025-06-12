@@ -1,10 +1,12 @@
 import fetch from 'node-fetch';
+import dotenv from 'dotenv';
+dotenv.config();
 
 // JIRA Configuration
 const JIRA_CONFIG = {
-  baseUrl: 'https://zenithive-team.atlassian.net',
-  email: 'sachint@zenithive.com', // Replace with your email
-  apiToken: 'a', // Replace with your API token
+  baseUrl: process.env.JIRA_BASE_URL,
+  email: process.env.JIRA_EMAIL,
+  apiToken: process.env.JIRA_API_TOKEN,
 };
 
 // Generate Base64 auth token
@@ -50,12 +52,13 @@ const getJiraProjects = async (req, res) => {
   }
 };
 
-// Controller function to get a specific project by key
+// Controller function to get a specific project by key (with expanded lead info including email)
 const getJiraProjectByKey = async (req, res) => {
   try {
     const { projectKey } = req.params;
     
-    const response = await fetch(`${JIRA_CONFIG.baseUrl}/rest/api/3/project/${projectKey}`, {
+    // Expand lead field to get complete user information including email
+    const response = await fetch(`${JIRA_CONFIG.baseUrl}/rest/api/3/project/${projectKey}?expand=lead`, {
       method: 'GET',
       headers: {
         'Authorization': `Basic ${getAuthToken()}`,
@@ -89,9 +92,10 @@ const getJiraProjectByKey = async (req, res) => {
   }
 };
 
-// Controller function to get projects with expanded details
+// Controller function to get projects with expanded details including lead email
 const getJiraProjectsWithDetails = async (req, res) => {
   try {
+    // Include 'lead' in expand to get complete lead information with email
     const expandFields = 'description,lead,issueTypes,url,projectKeys';
     
     const response = await fetch(`${JIRA_CONFIG.baseUrl}/rest/api/3/project?expand=${expandFields}`, {
@@ -128,7 +132,6 @@ const getJiraProjectsWithDetails = async (req, res) => {
     });
   }
 };
-
 
 // Controller function to get issues for a specific project
 const getProjectIssues = async (req, res) => {
