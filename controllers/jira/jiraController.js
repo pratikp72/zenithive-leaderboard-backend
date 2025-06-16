@@ -164,7 +164,8 @@ const getProjectIssues = async (req, res) => {
           'updated',
           'description',
           'labels',
-          'components'
+          'components',
+          'worklog'
         ]
       })
     });
