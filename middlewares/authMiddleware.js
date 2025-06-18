@@ -26,7 +26,6 @@ export const verifyAdmin = async (req, res, next) => {
   }
 };
 
-
 export const verifyToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
 

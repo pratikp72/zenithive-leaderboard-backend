@@ -1,9 +1,9 @@
 import express from 'express';
-import { 
-  addProjectCost, 
-  getProjectCost, 
-  getAllProjectCosts, 
-  updateProjectCost 
+import {
+  addProjectCost,
+  getProjectCost,
+  getAllProjectCosts,
+  updateProjectCost,
 } from '../controllers/projectCostController.js';
 
 const router = express.Router();

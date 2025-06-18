@@ -47,16 +47,16 @@ export const getAllProjectCosts = async (req, res) => {
     // Aggregate to get the latest cost for each project
     const costs = await ProjectCost.aggregate([
       {
-        $sort: { createdAt: -1 }
+        $sort: { createdAt: -1 },
       },
       {
         $group: {
           _id: '$projectKey',
           projectKey: { $first: '$projectKey' },
           cost: { $first: '$cost' },
-          createdAt: { $first: '$createdAt' }
-        }
-      }
+          createdAt: { $first: '$createdAt' },
+        },
+      },
     ]);
 
     // Convert to object for easier lookup

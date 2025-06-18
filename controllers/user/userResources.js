@@ -1,5 +1,5 @@
 // controllers/user/userResources.js - Resource management operations
-import User from "../../models/User.js";
+import User from '../../models/User.js';
 
 // Update user resource information (salary, overhead, hours)
 export const updateUserResources = async (req, res) => {
@@ -8,7 +8,7 @@ export const updateUserResources = async (req, res) => {
     const { salary, overhead, monthlyHours } = req.body;
 
     // Import validation utility
-    const { validateResourceInputs } = await import("./utils/validation.js");
+    const { validateResourceInputs } = await import('./utils/validation.js');
     const validationError = validateResourceInputs({
       salary,
       overhead,
@@ -27,19 +27,15 @@ export const updateUserResources = async (req, res) => {
     // Get current user to calculate effective hourly cost
     const currentUser = await User.findById(userId);
     if (!currentUser) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: 'User not found' });
     }
 
     // Calculate effective hourly cost
     const finalSalary = salary !== undefined ? salary : currentUser.salary;
-    const finalOverhead =
-      overhead !== undefined ? overhead : currentUser.overhead;
-    const finalMonthlyHours =
-      monthlyHours !== undefined ? monthlyHours : currentUser.monthlyHours;
+    const finalOverhead = overhead !== undefined ? overhead : currentUser.overhead;
+    const finalMonthlyHours = monthlyHours !== undefined ? monthlyHours : currentUser.monthlyHours;
 
-    const { calculateEffectiveHourlyCost } = await import(
-      "./utils/costCalculator.js"
-    );
+    const { calculateEffectiveHourlyCost } = await import('./utils/costCalculator.js');
     updateData.effectiveHourlyCost = calculateEffectiveHourlyCost(
       finalSalary,
       finalOverhead,
@@ -49,13 +45,13 @@ export const updateUserResources = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
       new: true,
       runValidators: true,
-    }).select("-password");
+    }).select('-password');
 
-    console.log("updatedUser", updatedUser);
+    console.log('updatedUser', updatedUser);
 
     res.json(updatedUser);
   } catch (error) {
-    console.error("Update user resources error:", error);
+    console.error('Update user resources error:', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -65,12 +61,12 @@ export const updateUserResources = async (req, res) => {
 export const getUsersWithCostSummary = async (req, res) => {
   try {
     // Fetch all users except their passwords
-    const users = await User.find().select("-password");
+    const users = await User.find().select('-password');
 
     // Filter out users with role 'admin'
-    const filteredUsers = users.filter((user) => user.role !== "Admin");
+    const filteredUsers = users.filter((user) => user.role !== 'Admin');
 
-    const { calculateCostSummary } = await import("./utils/costCalculator.js");
+    const { calculateCostSummary } = await import('./utils/costCalculator.js');
     const summary = calculateCostSummary(filteredUsers);
 
     res.json({
@@ -78,7 +74,7 @@ export const getUsersWithCostSummary = async (req, res) => {
       summary,
     });
   } catch (error) {
-    console.error("Get users with cost summary error:", error);
+    console.error('Get users with cost summary error:', error);
     res.status(500).json({ error: error.message });
   }
 };

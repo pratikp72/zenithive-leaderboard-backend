@@ -1,9 +1,4 @@
-export const calculateEffectiveHourlyCost = (
-  salary,
-  overhead,
-  monthlyHours
-) => {
-
+export const calculateEffectiveHourlyCost = (salary, overhead, monthlyHours) => {
   if (!salary || !monthlyHours) return 0;
 
   const salaryNum = parseFloat(salary); // already monthly
@@ -14,9 +9,7 @@ export const calculateEffectiveHourlyCost = (
   const monthlyCost = salaryNum * (1 + overheadNum / 100);
   const effectiveHourlyCost = monthlyCost / monthlyHoursNum;
 
-  const rounded =
-    Math.round((effectiveHourlyCost + Number.EPSILON) * 100) / 100;
-
+  const rounded = Math.round((effectiveHourlyCost + Number.EPSILON) * 100) / 100;
 
   return rounded;
 };
@@ -34,8 +27,7 @@ export const calculateCostSummary = (users) => {
 
   const avgHourlyCost =
     users.length > 0
-      ? users.reduce((sum, user) => sum + (user.effectiveHourlyCost || 0), 0) /
-        users.length
+      ? users.reduce((sum, user) => sum + (user.effectiveHourlyCost || 0), 0) / users.length
       : 0;
 
   return {

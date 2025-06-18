@@ -1,9 +1,9 @@
 import express from 'express';
-import { 
-  getJiraProjects, 
+import {
+  getJiraProjects,
   getProjectIssues,
-  getJiraProjectByKey, 
-  getJiraProjectsWithDetails 
+  getJiraProjectByKey,
+  getJiraProjectsWithDetails,
 } from '../controllers/jira/jiraController.js'; // Adjust path as needed
 
 const router = express.Router();

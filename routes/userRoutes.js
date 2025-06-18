@@ -1,14 +1,14 @@
 import express from 'express';
-import { 
-  createUser, 
-  getUsers, 
+import {
+  createUser,
+  getUsers,
   getUserById,
   updateUser,
   deleteUser,
   updateUserResources,
   getUsersWithCostSummary,
-  authenticateUser, 
-  changePassword 
+  authenticateUser,
+  changePassword,
 } from '../controllers/user/index.js';
 import { verifyAdmin, verifyToken } from '../middlewares/authMiddleware.js';
 
