@@ -58,9 +58,7 @@ import { getUsersWithCostSummary } from '../controllers/user/userResources.js';
 const router = express.Router();
 
 // Authentication routes
-// router.post('/auth/login', authenticateUser); // Updated to match new endpoint
-router.post('/auth', authenticateUser); // Keep old endpoint for compatibility
-// router.post('/auth/change-password', verifyToken, changePassword); // Using new structure
+router.post('/auth', authenticateUser);
 router.put('/change-password', verifyToken, changePassword); // Keep old structure for compatibility
 
 // JIRA Integration routes - MOVED BEFORE /:id routes to avoid conflicts

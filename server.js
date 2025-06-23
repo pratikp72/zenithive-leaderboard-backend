@@ -15,6 +15,10 @@ const app = express();
 app.use(cors({ origin: 'http://localhost:3000' }));
 app.use(express.json());
 
+app.get('/test', (req, res) => {
+  res.send('Deployed backend works ✅');
+});
+
 app.use('/api/users', userRoutes);
 app.use('/api/points', pointRoutes);
 app.use('/api/projects', jiraRoutes);
