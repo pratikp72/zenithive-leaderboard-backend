@@ -1,25 +1,26 @@
-name: Deploy to Azure zenithive-leaderboard-backend
+name: Deploy to Azure VM
 
 on:
   push:
     branches: [zenithive-leaderboard-backend]
-  pull_request:
-    branches: [zenithive-leaderboard-backend]
 
 jobs:
-  build:
-
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-
-    - name: Install dependencies
-      run: npm install
-
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: 57.159.25.129
+          username: azureuser
+          key: ${{ secrets.AZURE_VM_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd zenithive-leaderboard-backend
+            git pull origin zenithive-leaderboard-backend
+            npm install
+            pm2 restart all
