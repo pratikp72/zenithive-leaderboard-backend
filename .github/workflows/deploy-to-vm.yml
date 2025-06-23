@@ -18,6 +18,7 @@ jobs:
           host: 57.159.25.129
           username: azureuser
           key: ${{ secrets.AZURE_VM_PRIVATE_KEY }}
+          passphrase: ${{ secrets.AZURE_SSH_PASSPHRASE }}
           port: 22
           script: |
             cd zenithive-leaderboard-backend
