@@ -90,10 +90,22 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
+// Load all routes
+console.log('Loading routes...');
+
 app.use('/api/users', userRoutes);
+console.log('User routes loaded');
+
 app.use('/api/points', pointRoutes);
+console.log('Point routes loaded');
+
 app.use('/api/projects', jiraRoutes);
+console.log('Jira routes loaded');
+
 app.use('/api/project-cost', projectCostRoutes);
+console.log('Project cost routes loaded');
+
+console.log('All routes loaded successfully');
 
 // Add 404 handler for debugging
 app.use('*', (req, res) => {
