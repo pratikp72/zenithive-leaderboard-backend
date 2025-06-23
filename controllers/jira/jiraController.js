@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -201,4 +202,106 @@ const getProjectIssues = async (req, res) => {
   }
 };
 
-export { getJiraProjects, getJiraProjectByKey, getJiraProjectsWithDetails, getProjectIssues };
+// Add to your JIRA controller
+const getJiraUser = async (req, res) => {
+  try {
+    const { accountId } = req.params;
+
+    const response = await fetch(
+      `${JIRA_CONFIG.baseUrl}/rest/api/3/user?accountId=${accountId}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Basic ${getAuthToken()}`,
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: `Failed to fetch user ${accountId}`,
+        status: response.status,
+        statusText: response.statusText,
+      });
+    }
+
+    const user = await response.json();
+
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    console.error('Error fetching JIRA user:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      message: error.message,
+    });
+  }
+};
+
+// Add this to your JIRA controller
+const searchJiraUserByEmail = async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email parameter is required',
+      });
+    }
+
+    const response = await fetch(
+      `${JIRA_CONFIG.baseUrl}/rest/api/3/user/search?query=${encodeURIComponent(email)}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Basic ${getAuthToken()}`,
+          Accept: 'application/json',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: `Failed to search JIRA user by email: ${email}`,
+        status: response.status,
+        statusText: response.statusText,
+      });
+    }
+
+    const users = await response.json();
+    const matchingUser = users.find(u => 
+      u.emailAddress?.toLowerCase() === email.toLowerCase()
+    );
+
+    if (matchingUser) {
+      res.status(200).json({
+        success: true,
+        data: {
+          email: matchingUser.emailAddress,
+          displayName: matchingUser.displayName,
+          accountId: matchingUser.accountId,
+        },
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: `User with email ${email} not found in JIRA`,
+      });
+    }
+  } catch (error) {
+    console.error('Error searching JIRA user by email:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      message: error.message,
+    });
+  }
+};
+
+export { getJiraProjects, getJiraProjectByKey, getJiraProjectsWithDetails, getProjectIssues,getJiraUser,searchJiraUserByEmail };

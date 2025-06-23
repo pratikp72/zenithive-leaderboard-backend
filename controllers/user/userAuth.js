@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // controllers/user/userAuth.js - Authentication operations
 import User from '../../models/User.js';
 import bcrypt from 'bcrypt';
@@ -14,6 +15,7 @@ export const authenticateUser = async (req, res) => {
       });
     }
 
+    
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({
@@ -28,6 +30,15 @@ export const authenticateUser = async (req, res) => {
       });
     }
 
+    // Check if user is still using default password
+    // Since the user just logged in with a valid password, we need to check if that password is the default one
+    const isDefaultPassword = password === 'zenithive123';
+    
+    console.log('Password check:', { 
+      loginPassword: password, 
+      isDefaultPassword: isDefaultPassword 
+    });
+
     const token = jwt.sign(
       {
         email: user.email,
@@ -41,6 +52,7 @@ export const authenticateUser = async (req, res) => {
     res.json({
       message: 'Authentication successful',
       token,
+      requiresPasswordChange: isDefaultPassword,
       user: {
         id: user._id,
         name: user.name,

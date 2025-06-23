@@ -66,8 +66,8 @@ export const getUsersWithCostSummary = async (req, res) => {
     // Filter out users with role 'admin'
     const filteredUsers = users.filter((user) => user.role !== 'Admin');
 
-    const { calculateCostSummary } = await import('./utils/costCalculator.js');
-    const summary = calculateCostSummary(filteredUsers);
+    const { calculateCostSummaryAlternative  } = await import('./utils/costCalculator.js');
+    const summary = calculateCostSummaryAlternative (filteredUsers);
 
     res.json({
       users: filteredUsers,
