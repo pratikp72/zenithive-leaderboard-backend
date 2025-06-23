@@ -34,11 +34,6 @@ export const authenticateUser = async (req, res) => {
     // Since the user just logged in with a valid password, we need to check if that password is the default one
     const isDefaultPassword = password === 'zenithive123';
     
-    console.log('Password check:', { 
-      loginPassword: password, 
-      isDefaultPassword: isDefaultPassword 
-    });
-
     const token = jwt.sign(
       {
         email: user.email,
