@@ -58,9 +58,9 @@ const router = express.Router();
 router.post('/auth', authenticateUser);
 router.put('/change-password', verifyToken, changePassword);
 
-router.get('/jira/search', verifyAdmin, searchJiraUsers); // Admin only for JIRA operations
-router.post('/jira/create', verifyAdmin, createUserFromJira); // Admin only
-router.post('/jira/bulk-import', verifyAdmin, bulkImportJiraUsers); // Admin only
+router.get('/jira/search', verifyAdmin, searchJiraUsers);
+router.post('/jira/create', verifyAdmin, createUserFromJira);
+router.post('/jira/bulk-import', verifyAdmin, bulkImportJiraUsers);
 
 router.get('/', verifyToken, getUsers); // All authenticated users can view users
 router.get('/cost-summary', verifyAdmin, getUsersWithCostSummary); // Only admin can see cost summary
