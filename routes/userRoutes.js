@@ -51,22 +51,17 @@ import {
 import { authenticateUser, changePassword } from '../controllers/user/userAuth.js';
 import { verifyAdmin,verifyToken } from '../middlewares/authMiddleware.js';
 import { getUsersWithCostSummary } from '../controllers/user/userResources.js';
-// Import middleware - you can use either naming convention
-// Alternative if you prefer your old structure:
-// import { verifyAdmin, verifyToken } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
 // Authentication routes
 router.post('/auth', authenticateUser);
-router.put('/change-password', verifyToken, changePassword); // Keep old structure for compatibility
+router.put('/change-password', verifyToken, changePassword);
 
-// JIRA Integration routes - MOVED BEFORE /:id routes to avoid conflicts
 router.get('/jira/search', verifyAdmin, searchJiraUsers); // Admin only for JIRA operations
 router.post('/jira/create', verifyAdmin, createUserFromJira); // Admin only
 router.post('/jira/bulk-import', verifyAdmin, bulkImportJiraUsers); // Admin only
 
-// Basic CRUD routes
 router.get('/', verifyToken, getUsers); // All authenticated users can view users
 router.get('/cost-summary', verifyAdmin, getUsersWithCostSummary); // Only admin can see cost summary
 router.post('/create', verifyAdmin, createUser); // Only admin can create users
