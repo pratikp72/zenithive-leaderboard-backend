@@ -21,6 +21,6 @@ jobs:
           port: 22
           script: |
             cd zenithive-leaderboard-backend
-            git pull origin zenithive-leaderboard-backend
+            git pull origin main
             npm install
             pm2 restart all
