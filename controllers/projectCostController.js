@@ -1,7 +1,7 @@
 // controllers/projectCostController.js
 import ProjectCost from '../models/ProjectCost.js';
 
-// Add project cost (existing)
+// Add project cost (replace existing cost for the project)
 export const addProjectCost = async (req, res) => {
   try {
     const { projectKey, cost } = req.body;
@@ -13,8 +13,20 @@ export const addProjectCost = async (req, res) => {
       });
     }
 
-    const costEntry = new ProjectCost({ projectKey, cost });
-    await costEntry.save();
+    // Check if cost entry already exists for this project
+    const existingCost = await ProjectCost.findOne({ projectKey });
+
+    let costEntry;
+    if (existingCost) {
+      // Update existing entry
+      existingCost.cost = cost;
+      existingCost.createdAt = new Date(); // Update timestamp
+      costEntry = await existingCost.save();
+    } else {
+      // Create new entry
+      costEntry = new ProjectCost({ projectKey, cost });
+      await costEntry.save();
+    }
 
     res.status(201).json({ 
       success: true,
@@ -30,7 +42,7 @@ export const addProjectCost = async (req, res) => {
   }
 };
 
-// Get project cost by project key (calculate total from all entries)
+// Get project cost by project key (get single cost entry)
 export const getProjectCost = async (req, res) => {
   try {
     const { projectKey } = req.params;
@@ -42,30 +54,25 @@ export const getProjectCost = async (req, res) => {
       });
     }
 
-    // Get all cost entries for this project and calculate total
-    const costEntries = await ProjectCost.find({ projectKey });
+    // Get the cost entry for this project
+    const costEntry = await ProjectCost.findOne({ projectKey });
 
-    if (!costEntries || costEntries.length === 0) {
+    if (!costEntry) {
       return res.status(200).json({ 
         success: true,
         data: {
           projectKey,
-          totalCost: 0,
-          entries: []
+          totalCost: 0
         }
       });
     }
 
-    // Calculate total cost from all entries
-    const totalCost = costEntries.reduce((sum, entry) => sum + entry.cost, 0);
-
     res.status(200).json({ 
       success: true,
       data: {
-        projectKey,
-        totalCost,
-        entries: costEntries,
-        lastUpdated: costEntries[costEntries.length - 1].createdAt
+        projectKey: costEntry.projectKey,
+        totalCost: costEntry.cost,
+        createdAt: costEntry.createdAt
       }
     });
   } catch (error) {
@@ -77,28 +84,17 @@ export const getProjectCost = async (req, res) => {
   }
 };
 
-// Get all project costs (calculate total for each project)
+// Get all project costs (get latest cost for each project)
 export const getAllProjectCosts = async (req, res) => {
   try {
-    // Aggregate to calculate total cost for each project
-    const costs = await ProjectCost.aggregate([
-      {
-        $group: {
-          _id: '$projectKey',
-          projectKey: { $first: '$projectKey' },
-          totalCost: { $sum: '$cost' },
-          entryCount: { $sum: 1 },
-          lastUpdated: { $max: '$createdAt' }
-        }
-      }
-    ]);
+    // Get all cost entries
+    const costs = await ProjectCost.find({});
 
     // Convert to object for easier lookup
     const costsMap = costs.reduce((acc, item) => {
       acc[item.projectKey] = {
-        totalCost: item.totalCost,
-        entryCount: item.entryCount,
-        lastUpdated: item.lastUpdated
+        totalCost: item.cost,
+        createdAt: item.createdAt
       };
       return acc;
     }, {});
@@ -116,7 +112,7 @@ export const getAllProjectCosts = async (req, res) => {
   }
 };
 
-// Update project cost (add new entry)
+// Update project cost (same as add - replace existing)
 export const updateProjectCost = async (req, res) => {
   try {
     const { projectKey } = req.params;
@@ -129,9 +125,19 @@ export const updateProjectCost = async (req, res) => {
       });
     }
 
-    // Create new entry (to maintain history)
-    const costEntry = new ProjectCost({ projectKey, cost });
-    await costEntry.save();
+    // Use findOneAndUpdate with upsert to create or update
+    const costEntry = await ProjectCost.findOneAndUpdate(
+      { projectKey },
+      { 
+        projectKey, 
+        cost,
+        createdAt: new Date()
+      },
+      { 
+        new: true, 
+        upsert: true // Create if doesn't exist
+      }
+    );
 
     res.status(200).json({ 
       success: true,
