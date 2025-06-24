@@ -225,22 +225,34 @@ const userSchema = new mongoose.Schema(
 // Add compound index for better query performance
 userSchema.index({ email: 1, accountId: 1 });
 
-// Method to calculate effective hourly cost
+// Method to calculate effective hourly cost - FIXED VERSION
 userSchema.methods.calculateEffectiveHourlyCost = function () {
   if (!this.salary || !this.monthlyHours) {
     return 0;
   }
 
   // Use parseFloat and proper rounding to avoid floating-point precision issues
-  const salary = parseFloat(this.salary);
-  const overhead = parseFloat(this.overhead) || 0;
-  const monthlyHours = parseFloat(this.monthlyHours);
+  const salaryNum = parseFloat(this.salary); // treating as monthly salary (not annual)
+  const overheadNum = parseFloat(this.overhead) || 0;
+  const monthlyHoursNum = parseFloat(this.monthlyHours);
 
-  const monthlyCost = (salary / 12) * (1 + overhead / 100);
-  const effectiveHourlyCost = monthlyCost / monthlyHours;
+  // FIXED: Don't divide by 12 - salary is already monthly
+  const monthlyCost = salaryNum * (1 + overheadNum / 100);
+  const effectiveHourlyCost = monthlyCost / monthlyHoursNum;
 
   // Round to 2 decimal places using a more reliable method
-  return Math.round((effectiveHourlyCost + Number.EPSILON) * 100) / 100;
+  const rounded = Math.round((effectiveHourlyCost + Number.EPSILON) * 100) / 100;
+  
+  console.log('Backend calculation:', {
+    salary: salaryNum,
+    overhead: overheadNum,
+    monthlyHours: monthlyHoursNum,
+    monthlyCost,
+    effectiveHourlyCost,
+    rounded
+  });
+
+  return rounded;
 };
 
 // Pre-save middleware to handle email uniqueness and calculate effective hourly cost
@@ -267,7 +279,16 @@ userSchema.pre('save', async function (next) {
 
     // Calculate effective hourly cost when salary, overhead, or monthlyHours change
     if (this.isModified('salary') || this.isModified('overhead') || this.isModified('monthlyHours')) {
+      console.log('Recalculating effective hourly cost for user:', this.name);
+      console.log('Input values:', {
+        salary: this.salary,
+        overhead: this.overhead,
+        monthlyHours: this.monthlyHours
+      });
+      
       this.effectiveHourlyCost = this.calculateEffectiveHourlyCost();
+      
+      console.log('Calculated effective hourly cost:', this.effectiveHourlyCost);
     }
 
     next();

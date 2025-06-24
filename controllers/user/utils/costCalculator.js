@@ -1,18 +1,18 @@
-// export const calculateEffectiveHourlyCost = (salary, overhead, monthlyHours) => {
-//   if (!salary || !monthlyHours) return 0;
+export const calculateEffectiveHourlyCost = (salary, overhead, monthlyHours) => {
+  if (!salary || !monthlyHours) return 0;
 
-//   const salaryNum = parseFloat(salary); // already monthly
-//   const overheadNum = parseFloat(overhead) || 0;
-//   const monthlyHoursNum = parseFloat(monthlyHours);
+  const salaryNum = parseFloat(salary); // already monthly
+  const overheadNum = parseFloat(overhead) || 0;
+  const monthlyHoursNum = parseFloat(monthlyHours);
 
-//   // Don't divide by 12
-//   const monthlyCost = salaryNum * (1 + overheadNum / 100);
-//   const effectiveHourlyCost = monthlyCost / monthlyHoursNum;
+  // Don't divide by 12
+  const monthlyCost = salaryNum * (1 + overheadNum / 100);
+  const effectiveHourlyCost = monthlyCost / monthlyHoursNum;
 
-//   const rounded = Math.round((effectiveHourlyCost + Number.EPSILON) * 100) / 100;
+  const rounded = Math.round((effectiveHourlyCost + Number.EPSILON) * 100) / 100;
 
-//   return rounded;
-// };
+  return rounded;
+};
 
 export const calculateCostSummary = (users) => {
   if (!Array.isArray(users)) {
@@ -104,20 +104,4 @@ export const debugCostCalculation = (users) => {
   console.log(`Total from Effective Hourly: ₹${totalFromEffectiveHourly}`);
   console.log(`Total from Salary + Overhead: ₹${totalFromSalary}`);
   console.log("=== End Debug ===");
-};
-
-export const calculateEffectiveHourlyCost = (salary, overhead, monthlyHours) => {
-  if (!salary || !monthlyHours) return 0;
-
-  const salaryNum = parseFloat(salary);
-  const overheadNum = parseFloat(overhead) || 0;
-  const monthlyHoursNum = parseFloat(monthlyHours);
-
-  // Calculate monthly salary with overhead
-  const monthlySalaryWithOverhead = (salaryNum * (1 + overheadNum / 100)) / 12;
-  
-  // Calculate hourly cost
-  const hourlyCost = monthlySalaryWithOverhead / monthlyHoursNum;
-
-  return Math.round((hourlyCost + Number.EPSILON) * 100) / 100;
 };

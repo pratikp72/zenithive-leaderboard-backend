@@ -25,12 +25,6 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
-
-app.get("/", (req, res) => {
-  res.send("Hello from backend");
-});
-
-
 app.use('/api/users', userRoutes);
 app.use('/api/points', pointRoutes);
 app.use('/api/projects', jiraRoutes);
