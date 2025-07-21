@@ -140,7 +140,7 @@ const leaderboardEntrySchema = new mongoose.Schema(
     date: { type: Date, default: Date.now },
     points: Number,
     reason: String,
-    category: String, // 'Functional' or 'Behavioral'
+    category: String,
   },
   { _id: false }
 );

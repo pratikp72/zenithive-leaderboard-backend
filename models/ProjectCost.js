@@ -1,6 +1,21 @@
 // models/ProjectCost.js
 import mongoose from 'mongoose';
 
+const recurringCostSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true
+  },
+  amount: {
+    type: Number,
+    required: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
 const projectCostSchema = new mongoose.Schema({
   projectKey: {
     type: String,
@@ -9,8 +24,10 @@ const projectCostSchema = new mongoose.Schema({
   },
   cost: {
     type: Number,
-    required: true
+    required: true,
+    default: 0
   },
+  recurringCosts: [recurringCostSchema], // Array of recurring costs
   description: {
     type: String,
     default: 'Project cost entry'
